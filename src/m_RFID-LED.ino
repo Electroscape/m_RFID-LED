@@ -9,11 +9,10 @@
  */
 
 
-String versionDate = "6.04.2022";
-String version = "1.5.0";
+String versionDate = "30.06.2022";
+String version = "1.6.2";
 
 #include "header_st.h"
-// I2C Port Expander
 
 #include <stb_common.h>
 #include <avr/wdt.h>
@@ -37,8 +36,8 @@ char ledKeyword[] = "!LED";
 
 
 
-// for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 #ifndef rfidDisable
+    // only use software SPI not hardware SPI
     Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
     Adafruit_PN532 RFID_READERS[1] = {RFID_0};
     uint8_t data[16];
@@ -75,8 +74,6 @@ void setup() {
 
 void loop() {
 
-    // if (Serial.available()) { Serial.write(Serial.read()); }
-
     #ifndef rfidDisable
         rfidRead();
     #endif
@@ -103,7 +100,6 @@ void loop() {
 
           
             if (i == 3) {
-                // STB.dbgln("I == 2");
                 #ifndef ledDisable
                 // double check this since the led stripes for testing may not be identical
                 long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
@@ -152,14 +148,3 @@ void rfidRead() {
     Serial.flush();
 }
 #endif
-
-void interruptCheck() {
-    unsigned long startTime = millis();
-    delay(10);
-    Serial.print("interruptcheck attempt ...");
-    Serial.flush();
-    while (millis() - startTime < 9 ) {}
-    Serial.println("success");
-    Serial.flush();
-    delay(10);
-}

@@ -1,9 +1,3 @@
-/**
-* To configure a relay:
-*   - rename REL_X_PIN to informative name
-*   - rename and set REL_X_INIT with your init value
-*   - create array with the used pins and benefit from loops :D
-*/
 #pragma once
 
 const unsigned long rfidCheckInterval = 250;
@@ -13,7 +7,6 @@ const unsigned long rfidCheckInterval = 250;
 const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 #define RFID_DATABLOCK      1
-#define OLED_I2C_ADD 0x3C    // Ist durch Hardware des OLEDs vorgegeben
 
 // --- LED settings --- 
 #define NR_OF_LEDS             31  /* Anzahl der Pixel auf einem Strang (Test 1 Pixel)                   */
