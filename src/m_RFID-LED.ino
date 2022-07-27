@@ -1,16 +1,12 @@
 /**
- * @file m_RFID-LED.ino
+ * @file BREAKOUT.ino
  * @author Martin Pek (martin.pek@web.de)
  * @brief 
  * @version 1.6.2
  * @date 30.06.2022
- * build with lib_arduino v0.6.2 
- * based on Breakout from r_The_Kidnapping
+ * build with lib_arduino v0.6.2
  */
 
-
-String versionDate = "30.06.2022";
-String version = "1.6.2";
 
 #include "header_st.h"
 
@@ -19,12 +15,14 @@ String version = "1.6.2";
 
 #include <stb_rfid.h>
 #include <stb_oled.h>
+#include <stb_brain.h>
 
 // #define ledDisable 1
 // #define rfidDisable 1
 // #define relayDisable 1
 
 STB STB;
+STB_BRAIN BRAIN;
 
 #ifndef ledDisable
     #include <stb_led.h>
@@ -36,8 +34,8 @@ char ledKeyword[] = "!LED";
 
 
 
+// for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 #ifndef rfidDisable
-    // only use software SPI not hardware SPI
     Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
     Adafruit_PN532 RFID_READERS[1] = {RFID_0};
     uint8_t data[16];
@@ -57,13 +55,19 @@ void setup() {
     STB.i2cScanner();
     wdt_reset();
 
+    BRAIN.receiveFlags(STB);
+
 #ifndef rfidDisable
-    STB_RFID::RFIDInit(RFID_0);
-    wdt_reset();
+    if (BRAIN.flags[rfidFlag]) {
+        STB_RFID::RFIDInit(RFID_0);
+        wdt_reset();
+    }
 #endif
 
 #ifndef ledDisable
-    STB_LED::ledInit(LED_Strips, 1, ledCnts, ledPins, NEO_BRG);
+    if (BRAIN.flags[ledFlag]) {
+        STB_LED::ledInit(LED_Strips, 1, ledCnts, ledPins, NEO_BRG);
+    }
 #endif
 
     wdt_reset();
@@ -74,8 +78,12 @@ void setup() {
 
 void loop() {
 
+    // if (Serial.available()) { Serial.write(Serial.read()); }
+
     #ifndef rfidDisable
+    if (BRAIN.flags[rfidFlag]) {
         rfidRead();
+    }
     #endif
 
     STB.rs485SlaveRespond();
@@ -100,10 +108,13 @@ void loop() {
 
           
             if (i == 3) {
+                // STB.dbgln("I == 2");
                 #ifndef ledDisable
                 // double check this since the led stripes for testing may not be identical
-                long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
-                STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
+                if (BRAIN.flags[ledFlag]) {
+                    long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
+                    STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
+                }
                 STB.rs485SendAck();
                 #endif
             }
