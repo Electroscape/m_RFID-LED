@@ -16,6 +16,7 @@
 #include <stb_rfid.h>
 #include <stb_oled.h>
 #include <stb_brain.h>
+#include <stb_led.h>
 
 // #define ledDisable 1
 // #define rfidDisable 1
@@ -23,15 +24,7 @@
 
 STB STB;
 STB_BRAIN BRAIN;
-
-#ifndef ledDisable
-    #include <stb_led.h>
-    #define FASTLED_INTERRUPT_RETRY_COUNT 1
-    Adafruit_NeoPixel LED_Strips[STRIPE_CNT];
-    const long int green = LED_Strips[0].Color(0,255,0);
-#endif
-char ledKeyword[] = "!LED";
-
+STB_LED LEDS;
 
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
@@ -43,19 +36,24 @@ char ledKeyword[] = "!LED";
 #endif
 
 
+char ledKeyword[] = "!LED";
+
+
 void setup() {
 
     STB.begin();
     STB.rs485SetSlaveAddr(0);
 
-    STB.dbgln("WDT endabled");
+    STB.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
 
     STB.i2cScanner();
     wdt_reset();
+    STB.defaultOled.setScrollMode(SCROLL_MODE_AUTO);
 
     BRAIN.receiveFlags(STB);
+    BRAIN.receiveSettings(STB);
 
 #ifndef rfidDisable
     if (BRAIN.flags[rfidFlag]) {
@@ -66,7 +64,7 @@ void setup() {
 
 #ifndef ledDisable
     if (BRAIN.flags[ledFlag]) {
-        STB_LED::ledInit(LED_Strips, 1, ledCnts, ledPins, NEO_BRG);
+        LEDS.ledInit(BRAIN.settings);
     }
 #endif
 
@@ -112,8 +110,8 @@ void loop() {
                 #ifndef ledDisable
                 // double check this since the led stripes for testing may not be identical
                 if (BRAIN.flags[ledFlag]) {
-                    long int setClr = LED_Strips[0].Color(values[0],values[2],values[1]);
-                    STB_LED::setAllStripsToClr(LED_Strips, 1, setClr);
+                    long int setClr = LEDS.Strips[0].Color(values[0],values[2],values[1]);
+                    LEDS.setAllStripsToClr(setClr);
                 }
                 STB.rs485SendAck();
                 #endif
@@ -136,26 +134,23 @@ void rfidRead() {
     lastRfidCheck = millis();
     char message[32] = "!RFID";
 
-    Serial.println("RFID start");
+    Serial.println(F("RFID..."));
     Serial.flush();
 
     for (int readerNo = 0; readerNo < RFID_AMOUNT; readerNo++) {
         if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
-            Serial.println("RFID read succees");
+            Serial.println(F("RFID read succees"));
             Serial.flush();
             strcat(message, "_");
             strcat(message, (char*) data);
         }
     }
 
-    Serial.println("RFID message adding");
-    Serial.flush();
-
     STB.defaultOled.clear();
     STB.defaultOled.println(message);
     STB.rs485AddToBuffer(message);
 
-    Serial.println("RFID end");
+    Serial.println(F("RFID end"));
     Serial.flush();
 }
 #endif
