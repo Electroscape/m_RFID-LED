@@ -24,7 +24,10 @@
 
 STB STB;
 STB_BRAIN BRAIN;
-STB_LED LEDS;
+
+#ifndef ledDisable 
+    STB_LED LEDS;
+#endif
 
 
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
@@ -36,13 +39,10 @@ STB_LED LEDS;
 #endif
 
 
-char ledKeyword[] = "!LED";
-
-
 void setup() {
 
     STB.begin();
-    STB.rs485SetSlaveAddr(0);
+    // STB.rs485SetSlaveAddr(0);
 
     STB.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
@@ -52,10 +52,13 @@ void setup() {
     wdt_reset();
     STB.defaultOled.setScrollMode(SCROLL_MODE_AUTO);
 
+    Serial.println(F("ReceiveFlags")); Serial.flush();
+    // BRAIN.receiveFlags(STB);
+    Serial.println(F("ReceiveSettings")); Serial.flush();
+    // BRAIN.receiveSettings(STB);
+    
+    
     /*
-    BRAIN.receiveFlags(STB);
-    BRAIN.receiveSettings(STB);
-    */
     BRAIN.flags[rfidFlag] = 1;
 
     // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
@@ -65,6 +68,8 @@ void setup() {
     // col 2 is the amount of leds
     BRAIN.settings[0][2] = 3;
     BRAIN.flags[ledFlag] = 1;
+    */
+
 
 
 #ifndef rfidDisable
@@ -88,8 +93,6 @@ void setup() {
 
 
 void loop() {
-
-    // if (Serial.available()) { Serial.write(Serial.read()); }
 
     #ifndef rfidDisable
     if (BRAIN.flags[rfidFlag]) {
@@ -141,11 +144,12 @@ void rfidRead() {
 #ifndef ledDisable
 void ledReceive() {
     Serial.println("ledReceive");
-    STB.rs485SlaveRespond();
+    BRAIN.rs485SlaveRespond();
 
     while (STB.rcvdPtr != NULL) {
         
-        if (strncmp((char *) ledKeyword, STB.rcvdPtr, 4) == 0) {
+        // strncmp((char *) ledKeyword, STB.rcvdPtr, 4) == 0
+        if (true) {
             
             char *cmdPtr = strtok(STB.rcvdPtr, "_");
             cmdPtr = strtok(NULL, "_");
