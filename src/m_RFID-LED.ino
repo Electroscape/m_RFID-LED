@@ -22,7 +22,6 @@
 // #define rfidDisable 1
 // #define relayDisable 1
 
-STB STB;
 STB_BRAIN BRAIN;
 
 #ifndef ledDisable 
@@ -40,22 +39,16 @@ STB_BRAIN BRAIN;
 
 
 void setup() {
-
-    STB.begin();
-    // STB.rs485SetSlaveAddr(0);
-
-    STB.dbgln(F("WDT endabled"));
+    BRAIN.begin();
+    BRAIN.setSlaveAddr(0);
+    BRAIN.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
 
-    STB.i2cScanner();
-    wdt_reset();
-    STB.defaultOled.setScrollMode(SCROLL_MODE_AUTO);
-
     Serial.println(F("ReceiveFlags")); Serial.flush();
-    // BRAIN.receiveFlags(STB);
+    BRAIN.receiveFlags();
     Serial.println(F("ReceiveSettings")); Serial.flush();
-    // BRAIN.receiveSettings(STB);
+    BRAIN.receiveSettings();
     
     
     /*
@@ -88,7 +81,7 @@ void setup() {
 
     wdt_reset();
 
-    STB.printSetupEnd();
+    BRAIN.STB_.printSetupEnd();
 }
 
 
@@ -131,9 +124,9 @@ void rfidRead() {
         }
     }
 
-    STB.defaultOled.clear();
-    STB.defaultOled.println(message);
-    STB.rs485AddToBuffer(message);
+    BRAIN.oledClear();
+    // STB.defaultOled.println(message);
+    BRAIN.addToBuffer(message);
 
     Serial.println(F("RFID end"));
     Serial.flush();
@@ -144,14 +137,14 @@ void rfidRead() {
 #ifndef ledDisable
 void ledReceive() {
     Serial.println("ledReceive");
-    BRAIN.rs485SlaveRespond();
+    BRAIN.slaveRespond();
 
-    while (STB.rcvdPtr != NULL) {
+    while (BRAIN.STB_.rcvdPtr != NULL) {
         
-        // strncmp((char *) ledKeyword, STB.rcvdPtr, 4) == 0
+        // strncmp((char *) ledKeyword, BRAIN.STB_.rcvdPtr, 4) == 0
         if (true) {
             
-            char *cmdPtr = strtok(STB.rcvdPtr, "_");
+            char *cmdPtr = strtok(BRAIN.STB_.rcvdPtr, "_");
             cmdPtr = strtok(NULL, "_");
 
             int i = 0;
@@ -174,13 +167,13 @@ void ledReceive() {
                     long int setClr = LEDS.Strips[0].Color(values[0],values[2],values[1]);
                     LEDS.setAllStripsToClr(setClr);
                 }
-                STB.rs485SendAck();
+                BRAIN.sendAck();
                 #endif
             }
             
         }
        
-        STB.rs485RcvdNextLn();
+        BRAIN.nextRcvdLn();
     }
 }
 #endif
