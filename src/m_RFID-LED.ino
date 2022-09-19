@@ -49,31 +49,30 @@ void setup() {
     BRAIN.receiveFlags();
     Serial.println(F("ReceiveSettings")); Serial.flush();
     BRAIN.receiveSettings();
-    
-    
-    /*
-    BRAIN.flags[rfidFlag] = 1;
 
+    /*
     // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
     BRAIN.settings[0][0] = settingCmds::ledCount;
     // col 1 is the PWM index
     BRAIN.settings[0][1] = 0;
     // col 2 is the amount of leds
     BRAIN.settings[0][2] = 3;
+
+    BRAIN.flags[rfidFlag] = 1;
     BRAIN.flags[ledFlag] = 1;
     */
 
 
 
 #ifndef rfidDisable
-    if (BRAIN.flags[rfidFlag]) {
+    if (BRAIN.flags[rfidFlag] > 0) {
         STB_RFID::RFIDInit(RFID_0);
         wdt_reset();
     }
 #endif
 
 #ifndef ledDisable
-    if (BRAIN.flags[ledFlag]) {
+    if (BRAIN.flags[ledFlag] > 0) {
         LEDS.ledInit(BRAIN.settings);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(75, 0, 0));
     }
@@ -92,13 +91,11 @@ void loop() {
         rfidRead();
     }
     #endif
-    
-    #ifndef ledDisable
-    if (BRAIN.flags[ledFlag]) {
+
+    if (BRAIN.flags[ledFlag] && BRAIN.slaveRespond()) {
         ledReceive();
     }
-    #endif
-
+    
     wdt_reset();
 }
 
@@ -136,14 +133,15 @@ void rfidRead() {
 
 #ifndef ledDisable
 void ledReceive() {
+
     Serial.println("ledReceive");
-    BRAIN.slaveRespond();
+    Serial.println(BRAIN.STB_.rcvdPtr);
 
     while (BRAIN.STB_.rcvdPtr != NULL) {
-        
-        // strncmp((char *) ledKeyword, BRAIN.STB_.rcvdPtr, 4) == 0
-        if (true) {
+        if (strncmp(KeywordsList::ledKeyword.c_str(), BRAIN.STB_.rcvdPtr, KeywordsList::ledKeyword.length()) == 0) {
             
+            BRAIN.sendAck();
+
             char *cmdPtr = strtok(BRAIN.STB_.rcvdPtr, "_");
             cmdPtr = strtok(NULL, "_");
 
@@ -151,9 +149,9 @@ void ledReceive() {
             int values[3] = {0,0,0};
 
             while (cmdPtr != NULL && i < 3) {
-                // STB.dbgln(cmdPtr);
+                // Serial.println(cmdPtr);
                 sscanf(cmdPtr,"%d", &values[i]);
-                // STB.dbgln(String(values[i]));
+                Serial.println(String(values[i]));
                 cmdPtr = strtok(NULL, "_");
                 i++;
             }
@@ -167,7 +165,7 @@ void ledReceive() {
                     long int setClr = LEDS.Strips[0].Color(values[0],values[2],values[1]);
                     LEDS.setAllStripsToClr(setClr);
                 }
-                BRAIN.sendAck();
+                
                 #endif
             }
             
