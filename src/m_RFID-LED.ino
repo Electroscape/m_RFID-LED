@@ -65,14 +65,14 @@ void setup() {
 
 
 #ifndef rfidDisable
-    if (BRAIN.flags[rfidFlag] > 0) {
+    if (BRAIN.flags & rfidFlag) {
         STB_RFID::RFIDInit(RFID_0);
         wdt_reset();
     }
 #endif
 
 #ifndef ledDisable
-    if (BRAIN.flags[ledFlag] > 0) {
+    if (BRAIN.flags & ledFlag) {
         LEDS.ledInit(BRAIN.settings);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(75, 0, 0));
     }
@@ -87,12 +87,14 @@ void setup() {
 void loop() {
 
     #ifndef rfidDisable
-    if (BRAIN.flags[rfidFlag]) {
+    if (BRAIN.flags & rfidFlag) {
         rfidRead();
     }
     #endif
 
-    if (BRAIN.flags[ledFlag] && BRAIN.slaveRespond()) {
+    if (BRAIN.flags & ledFlag && BRAIN.slaveRespond()) {
+        Serial.println("slave got pushed");
+        Serial.println(BRAIN.STB_.rcvdPtr);
         ledReceive();
     }
     
@@ -134,43 +136,8 @@ void rfidRead() {
 #ifndef ledDisable
 void ledReceive() {
 
-    Serial.println("ledReceive");
-    Serial.println(BRAIN.STB_.rcvdPtr);
-
     while (BRAIN.STB_.rcvdPtr != NULL) {
-        if (strncmp(KeywordsList::ledKeyword.c_str(), BRAIN.STB_.rcvdPtr, KeywordsList::ledKeyword.length()) == 0) {
-            
-            BRAIN.sendAck();
-
-            char *cmdPtr = strtok(BRAIN.STB_.rcvdPtr, "_");
-            cmdPtr = strtok(NULL, "_");
-
-            int i = 0;
-            int values[3] = {0,0,0};
-
-            while (cmdPtr != NULL && i < 3) {
-                // Serial.println(cmdPtr);
-                sscanf(cmdPtr,"%d", &values[i]);
-                Serial.println(String(values[i]));
-                cmdPtr = strtok(NULL, "_");
-                i++;
-            }
-
-          
-            if (i == 3) {
-                // STB.dbgln("I == 2");
-                #ifndef ledDisable
-                // double check this since the led stripes for testing may not be identical
-                if (BRAIN.flags[ledFlag]) {
-                    long int setClr = LEDS.Strips[0].Color(values[0],values[2],values[1]);
-                    LEDS.setAllStripsToClr(setClr);
-                }
-                
-                #endif
-            }
-            
-        }
-       
+        LEDS.evaluateCmds(BRAIN);
         BRAIN.nextRcvdLn();
     }
 }
