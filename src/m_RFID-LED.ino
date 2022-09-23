@@ -22,7 +22,7 @@
 // #define rfidDisable 1
 // #define relayDisable 1
 
-STB_BRAIN BRAIN;
+STB_BRAIN Brain;
 
 #ifndef ledDisable 
     STB_LED LEDS;
@@ -39,62 +39,67 @@ STB_BRAIN BRAIN;
 
 
 void setup() {
-    BRAIN.begin();
-    BRAIN.setSlaveAddr(0);
-    BRAIN.dbgln(F("WDT endabled"));
+    Brain.begin();
+    Brain.setSlaveAddr(1);
+    Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
 
+    /*
     Serial.println(F("ReceiveFlags")); Serial.flush();
-    BRAIN.receiveFlags();
+    Brain.receiveFlags();
     Serial.println(F("ReceiveSettings")); Serial.flush();
-    BRAIN.receiveSettings();
+    Brain.receiveSettings();
+    */
 
     /*
     // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
-    BRAIN.settings[0][0] = settingCmds::ledCount;
+    Brain.settings[0][0] = settingCmds::ledCount;
     // col 1 is the PWM index
-    BRAIN.settings[0][1] = 0;
+    Brain.settings[0][1] = 0;
     // col 2 is the amount of leds
-    BRAIN.settings[0][2] = 3;
-
-    BRAIN.flags[rfidFlag] = 1;
-    BRAIN.flags[ledFlag] = 1;
+    Brain.settings[0][2] = 4;
     */
+
+    // Brain.flags[rfidFlag] = 1;
+    // Brain.flags = ledFlag;
+
+
+    Brain.receiveSetup();
 
 
 
 #ifndef rfidDisable
-    if (BRAIN.flags & rfidFlag) {
+    if (Brain.flags & rfidFlag) {
         STB_RFID::RFIDInit(RFID_0);
         wdt_reset();
     }
 #endif
 
 #ifndef ledDisable
-    if (BRAIN.flags & ledFlag) {
-        LEDS.ledInit(BRAIN.settings);
+    if (Brain.flags & ledFlag) {
+        LEDS.ledInit(Brain.settings);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(75, 0, 0));
     }
 #endif
 
     wdt_reset();
 
-    BRAIN.STB_.printSetupEnd();
+    Brain.STB_.printSetupEnd();
 }
 
 
 void loop() {
 
     #ifndef rfidDisable
-    if (BRAIN.flags & rfidFlag) {
+    if (Brain.flags & rfidFlag) {
         rfidRead();
     }
     #endif
 
-    if (BRAIN.flags & ledFlag && BRAIN.slaveRespond()) {
+    if (Brain.flags & ledFlag && Brain.slaveRespond()) {
         Serial.println("slave got pushed");
-        Serial.println(BRAIN.STB_.rcvdPtr);
+        Serial.println(Brain.STB_.rcvdPtr);
         ledReceive();
     }
     
@@ -123,9 +128,9 @@ void rfidRead() {
         }
     }
 
-    BRAIN.oledClear();
+    Brain.oledClear();
     // STB.defaultOled.println(message);
-    BRAIN.addToBuffer(message);
+    Brain.addToBuffer(message);
 
     Serial.println(F("RFID end"));
     Serial.flush();
@@ -136,9 +141,9 @@ void rfidRead() {
 #ifndef ledDisable
 void ledReceive() {
 
-    while (BRAIN.STB_.rcvdPtr != NULL) {
-        LEDS.evaluateCmds(BRAIN);
-        BRAIN.nextRcvdLn();
+    while (Brain.STB_.rcvdPtr != NULL) {
+        LEDS.evaluateCmds(Brain);
+        Brain.nextRcvdLn();
     }
 }
 #endif
