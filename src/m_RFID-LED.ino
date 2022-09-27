@@ -52,16 +52,20 @@ void setup() {
     Brain.receiveSettings();
     */
 
+    for (int i=0; i<4; i++) {
+        // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
+        Brain.settings[i][0] = settingCmds::ledCount;
+        // col 1 is the PWM index
+        Brain.settings[i][1] = i;
+        // col 2 is the amount of leds
+        Brain.settings[i][2] = 4;
+    }
+
+
     
-    // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
-    Brain.settings[0][0] = settingCmds::ledCount;
-    // col 1 is the PWM index
-    Brain.settings[0][1] = 0;
-    // col 2 is the amount of leds
-    Brain.settings[0][2] = 4;
     
 
-    Brain.flags = ledFlag + rfidFlag;
+    Brain.flags = ledFlag;
 
     // Brain.receiveSetup();
 
