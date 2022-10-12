@@ -63,12 +63,10 @@ void setup() {
     }
 
     Brain.settings[4][0] = settingCmds::ledClrOrder;
-    Brain.settings[4][1] = NEO_BRG;
-    Brain.settings[4][2] = NEO_BRG;
-    Brain.settings[4][3] = NEO_BRG;
-    Brain.settings[4][4] = NEO_BRG;
-    
-    
+    Brain.settings[4][1] = NEO_RBG;
+    Brain.settings[4][2] = NEO_RBG;
+    Brain.settings[4][3] = NEO_RBG;
+    Brain.settings[4][4] = NEO_RBG;
 
     Brain.flags = ledFlag;
 
@@ -86,7 +84,14 @@ void setup() {
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
         LEDS.ledInit(Brain.settings);
+        /*
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(75, 0, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 75, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 75));
+        delay(1000);
+        */
     }
 #endif
 
