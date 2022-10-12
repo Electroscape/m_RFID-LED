@@ -19,7 +19,7 @@
 #include <stb_led.h>
 
 // #define ledDisable 1
-// #define rfidDisable 1
+#define rfidDisable 1
 // #define relayDisable 1
 
 STB_BRAIN Brain;
@@ -52,6 +52,7 @@ void setup() {
     Brain.receiveSettings();
     */
 
+   // ledCount may aswell be one row 
     for (int i=0; i<4; i++) {
         // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
         Brain.settings[i][0] = settingCmds::ledCount;
@@ -61,7 +62,11 @@ void setup() {
         Brain.settings[i][2] = 4;
     }
 
-
+    Brain.settings[4][0] = settingCmds::ledClrOrder;
+    Brain.settings[4][1] = NEO_BRG;
+    Brain.settings[4][2] = NEO_BRG;
+    Brain.settings[4][3] = NEO_BRG;
+    Brain.settings[4][4] = NEO_BRG;
     
     
 
