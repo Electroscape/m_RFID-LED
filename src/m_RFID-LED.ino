@@ -40,7 +40,7 @@ STB_BRAIN Brain;
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(0);
+    Brain.setSlaveAddr(1);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
@@ -114,7 +114,7 @@ void loop() {
         ledReceive();
     }
   
-    LEDS.loop(Brain);
+    LEDS.LEDloop(Brain);
     wdt_reset();
     
 }
