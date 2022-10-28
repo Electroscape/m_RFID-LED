@@ -40,7 +40,7 @@ STB_BRAIN Brain;
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(1);
+    Brain.setSlaveAddr(0);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
@@ -100,22 +100,23 @@ void setup() {
     Brain.STB_.printSetupEnd();
 }
 
-
 void loop() {
-
+    //Serial.println(millis());
     #ifndef rfidDisable
     if (Brain.flags & rfidFlag) {
         rfidRead();
     }
     #endif
-
+    
     if (Brain.flags & ledFlag && Brain.slaveRespond()) {
         Serial.println("slave got pushed");
         Serial.println(Brain.STB_.rcvdPtr);
         ledReceive();
     }
-    
+  
+    LEDS.loop(Brain);
     wdt_reset();
+    
 }
 
 
