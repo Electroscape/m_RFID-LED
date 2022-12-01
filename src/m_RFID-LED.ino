@@ -40,7 +40,9 @@ STB_BRAIN Brain;
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(1);
+    Brain.setSlaveAddr(3);
+    // https://jeelabs.org/2011/11/09/fixing-the-arduinos-pwm-2/index.html
+    // bitSet(TCCR1B, WGM12);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
@@ -59,14 +61,14 @@ void setup() {
         // col 1 is the PWM index
         Brain.settings[i][1] = i;
         // col 2 is the amount of leds
-        Brain.settings[i][2] = 4;
+        Brain.settings[i][2] = 60;
     }
 
     Brain.settings[4][0] = settingCmds::ledClrOrder;
-    Brain.settings[4][1] = NEO_RBG;
-    Brain.settings[4][2] = NEO_RBG;
-    Brain.settings[4][3] = NEO_RBG;
-    Brain.settings[4][4] = NEO_RBG;
+    Brain.settings[4][1] = NEO_BRG;
+    Brain.settings[4][2] = NEO_BRG;
+    Brain.settings[4][3] = NEO_BRG;
+    Brain.settings[4][4] = NEO_BRG;
 
     Brain.flags = ledFlag;
 
@@ -84,14 +86,22 @@ void setup() {
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
         LEDS.ledInit(Brain.settings);
-        /*
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(75, 0, 0));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 75, 0));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 75));
-        delay(1000);
-        */
+        
+       /*  wdt_disable();
+        while (true) {
+
+            LEDS.setStripToClr(0, LEDS.Strips[0].Color(75, 0, 0));
+            delay(1000);
+            LEDS.setStripToClr(1, LEDS.Strips[0].Color(0, 75, 0));
+            delay(1000);
+            LEDS.setStripToClr(2, LEDS.Strips[0].Color(0, 0, 0));
+            delay(1000);
+            LEDS.setStripToClr(3, LEDS.Strips[0].Color(0, 0, 75));
+            delay(1000);
+            LEDS.setAllStripsToClr( LEDS.Strips[0].Color(25, 25, 25));
+            delay(1000);
+        } */
+        
     }
 #endif
 
