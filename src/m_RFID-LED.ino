@@ -53,7 +53,7 @@ void setup() {
     */
 
    // ledCount may aswell be one row 
-    for (int i=0; i<3; i++) {
+    for (int i=0; i<ledCnt; i++) {
         // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
         Brain.settings[i][0] = settingCmds::ledCount;
         // col 1 is the PWM index
@@ -62,11 +62,11 @@ void setup() {
         Brain.settings[i][2] = 1;
     }
 
-    Brain.settings[4][0] = settingCmds::ledClrOrder;
-    Brain.settings[4][1] = NEO_RBG;
-    Brain.settings[4][2] = NEO_RBG;
-    Brain.settings[4][3] = NEO_RBG;
-    Brain.settings[4][4] = NEO_RBG;
+    Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
+    Brain.settings[ledCnt][1] = NEO_RBG;
+    Brain.settings[ledCnt][2] = NEO_RBG;
+    Brain.settings[ledCnt][3] = NEO_RBG;
+    Brain.settings[ledCnt][4] = NEO_RBG;
 
     Brain.flags = ledFlag;
 
@@ -84,14 +84,16 @@ void setup() {
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
         LEDS.ledInit(Brain.settings);
-        /*
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(75, 0, 0));
+        
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
         delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 75, 0));
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
         delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 75));
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
         delay(1000);
-        */
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
+
+        
     }
 #endif
 
