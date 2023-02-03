@@ -22,6 +22,7 @@
 #define rfidDisable 1
 // #define relayDisable 1
 
+
 STB_BRAIN Brain;
 
 #ifndef ledDisable 
@@ -63,10 +64,10 @@ void setup() {
     }
 
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
-    Brain.settings[ledCnt][1] = NEO_RBG;
-    Brain.settings[ledCnt][2] = NEO_RBG;
-    Brain.settings[ledCnt][3] = NEO_RBG;
-    Brain.settings[ledCnt][4] = NEO_RBG;
+    Brain.settings[ledCnt][1] = NEO_RGB;
+    Brain.settings[ledCnt][2] = NEO_RGB;
+    Brain.settings[ledCnt][3] = NEO_RGB;
+    Brain.settings[ledCnt][4] = NEO_RGB;
 
     Brain.flags = ledFlag;
 
