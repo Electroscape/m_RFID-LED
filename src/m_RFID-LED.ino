@@ -19,8 +19,8 @@
 #include <stb_led.h>
 
 // #define ledDisable 1
-#define rfidDisable 1
-// #define relayDisable 1
+// #define rfidDisable 1
+ #define relayDisable 1
 
 
 STB_BRAIN Brain;
@@ -33,7 +33,10 @@ STB_BRAIN Brain;
 // for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 #ifndef rfidDisable
     Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
-    Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+    Adafruit_PN532 RFID_1(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_2_SS_PIN);
+    Adafruit_PN532 RFID_2(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_3_SS_PIN);
+    Adafruit_PN532 RFID_3(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_4_SS_PIN);
+    Adafruit_PN532 RFID_READERS[4] = {RFID_0, RFID_1, RFID_2, RFID_3};
     uint8_t data[16];
     unsigned long lastRfidCheck = millis();
 #endif
@@ -60,14 +63,14 @@ void setup() {
         // col 1 is the PWM index
         Brain.settings[i][1] = i;
         // col 2 is the amount of leds
-        Brain.settings[i][2] = 1;
+        Brain.settings[i][2] = 3;
     }
 
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
-    Brain.settings[ledCnt][1] = NEO_RGB;
-    Brain.settings[ledCnt][2] = NEO_RGB;
-    Brain.settings[ledCnt][3] = NEO_RGB;
-    Brain.settings[ledCnt][4] = NEO_RGB;
+    Brain.settings[ledCnt][1] = NEO_GRB;
+    Brain.settings[ledCnt][2] = NEO_GRB;
+    Brain.settings[ledCnt][3] = NEO_GRB;
+    Brain.settings[ledCnt][4] = NEO_GRB;
 
     Brain.flags = ledFlag;
 
@@ -78,6 +81,9 @@ void setup() {
 #ifndef rfidDisable
     if (Brain.flags & rfidFlag) {
         STB_RFID::RFIDInit(RFID_0);
+        STB_RFID::RFIDInit(RFID_1);
+        STB_RFID::RFIDInit(RFID_2);
+        STB_RFID::RFIDInit(RFID_3);
         wdt_reset();
     }
 #endif
