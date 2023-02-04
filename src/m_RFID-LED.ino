@@ -1,9 +1,9 @@
 /**
- * @file BREAKOUT.ino
- * @author Martin Pek (martin.pek@web.de)
+ * @file RFID_LED.ino for Analyzer Pod83
+ * @author Christian Walter (pauseandplay@cybwalt.de)
  * @brief 
  * @version 1.6.2
- * @date 30.06.2022
+ * @date 04.02.2023
  * build with lib_arduino v0.6.2
  */
 
@@ -37,7 +37,8 @@ STB_BRAIN Brain;
     Adafruit_PN532 RFID_2(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_3_SS_PIN);
     Adafruit_PN532 RFID_3(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_4_SS_PIN);
     Adafruit_PN532 RFID_READERS[4] = {RFID_0, RFID_1, RFID_2, RFID_3};
-    uint8_t data[16];
+    STB_RFID RFIDS;
+    //uint8_t data[16];
     unsigned long lastRfidCheck = millis();
 #endif
 
@@ -72,7 +73,7 @@ void setup() {
     Brain.settings[ledCnt][3] = NEO_GRB;
     Brain.settings[ledCnt][4] = NEO_GRB;
 
-    Brain.flags = ledFlag;
+    Brain.flags = ledFlag+rfidFlag;
 
     // Brain.receiveSetup();
 
@@ -136,26 +137,19 @@ void rfidRead() {
     }
 
     lastRfidCheck = millis();
-    char message[32] = "!RFID";
+    char message[32];
 
-    Serial.println(F("RFID..."));
-    Serial.flush();
-
-    for (int readerNo = 0; readerNo < RFID_AMOUNT; readerNo++) {
-        if (STB_RFID::cardRead(RFID_READERS[0], data, RFID_DATABLOCK)) {
-            Serial.println(F("RFID read succees"));
-            Serial.flush();
-            strcat(message, "_");
-            strcat(message, (char*) data);
-        }
-    }
+    //Serial.println(F("RFID..."));
+   // Serial.flush();
+    message[32]= RFIDS.allRFID_Message(RFID_READERS,RFID_AMOUNT, RFID_DATABLOCK);
 
     Brain.oledClear();
     // STB.defaultOled.println(message);
+    Serial.println(message);
     Brain.addToBuffer(message);
 
-    Serial.println(F("RFID end"));
-    Serial.flush();
+    //Serial.println(F("RFID end"));
+    //Serial.flush();
 }
 #endif
 
