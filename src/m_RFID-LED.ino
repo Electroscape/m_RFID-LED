@@ -14,12 +14,11 @@
 #include <avr/wdt.h>
 
 #include <stb_rfid.h>
-#include <stb_oled.h>
 #include <stb_brain.h>
 #include <stb_led.h>
 
 // #define ledDisable 1
-// #define rfidDisable 1
+ //#define rfidDisable 1
  #define relayDisable 1
 
 
@@ -30,7 +29,6 @@ STB_BRAIN Brain;
 #endif
 
 
-// for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
 #ifndef rfidDisable
     Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
     Adafruit_PN532 RFID_1(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_2_SS_PIN);
@@ -38,24 +36,16 @@ STB_BRAIN Brain;
     Adafruit_PN532 RFID_3(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_4_SS_PIN);
     Adafruit_PN532 RFID_READERS[4] = {RFID_0, RFID_1, RFID_2, RFID_3};
     STB_RFID RFIDS;
-    //uint8_t data[16];
     unsigned long lastRfidCheck = millis();
 #endif
 
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(1);
+    Brain.setSlaveAddr(0);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
-
-    /*
-    Serial.println(F("ReceiveFlags")); Serial.flush();
-    Brain.receiveFlags();
-    Serial.println(F("ReceiveSettings")); Serial.flush();
-    Brain.receiveSettings();
-    */
 
    // ledCount may aswell be one row 
     for (int i=0; i<ledCnt; i++) {
@@ -75,9 +65,19 @@ void setup() {
 
     Brain.flags = ledFlag+rfidFlag;
 
-    // Brain.receiveSetup();
-
-
+#ifndef ledDisable
+    if (Brain.flags & ledFlag) {
+        LEDS.ledInit(Brain.settings);        
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
+        Serial.println(F("Color Test finished"));        
+    }
+#endif
 
 #ifndef rfidDisable
     if (Brain.flags & rfidFlag) {
@@ -88,36 +88,19 @@ void setup() {
         wdt_reset();
     }
 #endif
-
-#ifndef ledDisable
-    if (Brain.flags & ledFlag) {
-        LEDS.ledInit(Brain.settings);
-        
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
-
-        
-    }
-#endif
-
     wdt_reset();
-
     Brain.STB_.printSetupEnd();
 }
 
 void loop() {
     //Serial.println(millis());
-    #ifndef rfidDisable
+#ifndef rfidDisable
     if (Brain.flags & rfidFlag) {
         rfidRead();
     }
-    #endif
+#endif
     
+#ifndef ledDisable
     if (Brain.flags & ledFlag && Brain.slaveRespond()) {
         Serial.println("slave got pushed");
         Serial.println(Brain.STB_.rcvdPtr);
@@ -125,6 +108,8 @@ void loop() {
     }
   
     LEDS.LEDloop(Brain);
+    LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
+#endif
     wdt_reset();
     
 }
@@ -139,17 +124,10 @@ void rfidRead() {
     lastRfidCheck = millis();
     char message[32];
 
-    //Serial.println(F("RFID..."));
-   // Serial.flush();
     message[32]= RFIDS.allRFID_Message(RFID_READERS,RFID_AMOUNT, RFID_DATABLOCK);
 
-    Brain.oledClear();
-    // STB.defaultOled.println(message);
     Serial.println(message);
     Brain.addToBuffer(message);
-
-    //Serial.println(F("RFID end"));
-    //Serial.flush();
 }
 #endif
 
