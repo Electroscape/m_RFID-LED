@@ -1,6 +1,6 @@
 #pragma once
 
-const unsigned long rfidCheckInterval = 250;
+const unsigned long rfidCheckInterval = 500;
 
 #define RFID_AMOUNT         4
 #define RFID_DATABLOCK      1

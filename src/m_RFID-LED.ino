@@ -18,7 +18,7 @@
 #include <stb_led.h>
 
 // #define ledDisable 1
- //#define rfidDisable 1
+// #define rfidDisable 1
  #define relayDisable 1
 
 
@@ -37,6 +37,7 @@ STB_BRAIN Brain;
     Adafruit_PN532 RFID_READERS[4] = {RFID_0, RFID_1, RFID_2, RFID_3};
     STB_RFID RFIDS;
     unsigned long lastRfidCheck = millis();
+    size_t  length_message = 0;
 #endif
 
 
@@ -75,7 +76,7 @@ void setup() {
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
         delay(1000);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
-        Serial.println(F("Color Test finished"));        
+        //Serial.println(F("Color Test finished"));        
     }
 #endif
 
@@ -89,7 +90,7 @@ void setup() {
     }
 #endif
     wdt_reset();
-    Brain.STB_.printSetupEnd();
+    //Brain.STB_.printSetupEnd();
 }
 
 void loop() {
@@ -102,13 +103,12 @@ void loop() {
     
 #ifndef ledDisable
     if (Brain.flags & ledFlag && Brain.slaveRespond()) {
-        Serial.println("slave got pushed");
-        Serial.println(Brain.STB_.rcvdPtr);
+        //Serial.println("slave got pushed");
+        //Serial.println(Brain.STB_.rcvdPtr);
         ledReceive();
-    }
+    } 
   
     LEDS.LEDloop(Brain);
-    LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
 #endif
     wdt_reset();
     
@@ -122,12 +122,16 @@ void rfidRead() {
     }
 
     lastRfidCheck = millis();
+
     char message[32];
 
     message[32]= RFIDS.allRFID_Message(RFID_READERS,RFID_AMOUNT, RFID_DATABLOCK);
-
-    Serial.println(message);
-    Brain.addToBuffer(message);
+    
+   // if (strlen(message) != length_message){
+        //Serial.println(message);
+        Brain.addToBuffer(message);  
+        length_message = strlen(message);
+    //}
 }
 #endif
 
