@@ -18,7 +18,7 @@
 #include <stb_led.h>
 
 // #define ledDisable 1
-// #define rfidDisable 1
+ #define rfidDisable 1
  #define relayDisable 1
 
 
@@ -31,10 +31,7 @@ STB_BRAIN Brain;
 
 #ifndef rfidDisable
     Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
-    Adafruit_PN532 RFID_1(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_2_SS_PIN);
-    Adafruit_PN532 RFID_2(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_3_SS_PIN);
-    Adafruit_PN532 RFID_3(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_4_SS_PIN);
-    Adafruit_PN532 RFID_READERS[4] = {RFID_0, RFID_1, RFID_2, RFID_3};
+       Adafruit_PN532 RFID_READERS[1] = {RFID_0};
     STB_RFID RFIDS;
     unsigned long lastRfidCheck = millis();
     size_t  length_message = 0;
@@ -55,7 +52,7 @@ void setup() {
         // col 1 is the PWM index
         Brain.settings[i][1] = i;
         // col 2 is the amount of leds
-        Brain.settings[i][2] = 3;
+        Brain.settings[i][2] = 5;
     }
 
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
@@ -64,18 +61,19 @@ void setup() {
     Brain.settings[ledCnt][3] = NEO_GRB;
     Brain.settings[ledCnt][4] = NEO_GRB;
 
-    Brain.flags = ledFlag+rfidFlag;
+    Brain.flags = ledFlag;
 
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
         LEDS.ledInit(Brain.settings);        
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
-        delay(1000);
+        delay(2000);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
-        delay(1000);
+        delay(2000);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
-        delay(1000);
+        delay(2000);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
+        delay(2000);
         //Serial.println(F("Color Test finished"));        
     }
 #endif
@@ -105,10 +103,18 @@ void loop() {
     if (Brain.flags & ledFlag && Brain.slaveRespond()) {
         //Serial.println("slave got pushed");
         //Serial.println(Brain.STB_.rcvdPtr);
-        ledReceive();
+       // ledReceive();
     } 
   
-    LEDS.LEDloop(Brain);
+    LEDS.LEDloop(Brain);      
+        //LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
+       // delay(1000);
+        //LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
+        //delay(5000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
+        delay(5000);
+        //LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
+       // delay(1000);
 #endif
     wdt_reset();
     
