@@ -52,20 +52,18 @@ void setup() {
         // col 1 is the PWM index
         Brain.settings[i][1] = i;
         // col 2 is the amount of leds
-        Brain.settings[i][2] = 5;
+        Brain.settings[i][2] = 6;
     }
 
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
     Brain.settings[ledCnt][1] = NEO_GRB;
-    Brain.settings[ledCnt][2] = NEO_GRB;
-    Brain.settings[ledCnt][3] = NEO_GRB;
-    Brain.settings[ledCnt][4] = NEO_GRB;
 
     Brain.flags = ledFlag;
 
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
-        LEDS.ledInit(Brain.settings);        
+        LEDS.ledInit(Brain.settings); 
+        Serial.println("Color Test");       
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
         delay(2000);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
@@ -101,20 +99,12 @@ void loop() {
     
 #ifndef ledDisable
     if (Brain.flags & ledFlag && Brain.slaveRespond()) {
-        //Serial.println("slave got pushed");
-        //Serial.println(Brain.STB_.rcvdPtr);
-       // ledReceive();
+        Serial.println("slave got pushed");
+        Serial.println(Brain.STB_.rcvdPtr);
+        ledReceive();
     } 
   
     LEDS.LEDloop(Brain);      
-        //LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
-       // delay(1000);
-        //LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
-        //delay(5000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
-        delay(5000);
-        //LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
-       // delay(1000);
 #endif
     wdt_reset();
     
