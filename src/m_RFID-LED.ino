@@ -16,6 +16,7 @@
 #include <stb_rfid.h>
 #include <stb_brain.h>
 #include <stb_led.h>
+#include <stb_servo.h>
 
 // #define ledDisable 1
  #define rfidDisable 1
@@ -27,6 +28,7 @@ STB_BRAIN Brain;
 #ifndef ledDisable 
     STB_LED LEDS;
 #endif
+STB_SERVO Servos;
 
 
 #ifndef rfidDisable
@@ -58,7 +60,7 @@ void setup() {
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
     Brain.settings[ledCnt][1] = NEO_GRB;
 
-    Brain.flags = ledFlag;
+    Brain.flags = ledFlag + servoFlag;
 
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
@@ -86,6 +88,13 @@ void setup() {
     }
 #endif
     wdt_reset();
+  
+    /* Serial.println("Servo Strip3");
+    Servos.moveSingleServo(2,180);
+    delay(1000); 
+    Serial.println("Servo Strip3");
+    Servos.moveSingleServo(2,0);
+    delay(1000); */
     //Brain.STB_.printSetupEnd();
 }
 
@@ -106,6 +115,13 @@ void loop() {
   
     LEDS.LEDloop(Brain);      
 #endif
+
+    if (Brain.flags & servoFlag && Brain.slaveRespond()) {
+        Serial.println("slave got pushed");
+        Serial.println(Brain.STB_.rcvdPtr);
+        servoReceive();
+    } 
+
     wdt_reset();
     
 }
@@ -141,3 +157,11 @@ void ledReceive() {
     }
 }
 #endif
+
+void servoReceive() {
+
+    while (Brain.STB_.rcvdPtr != NULL) {
+        Servos.evaluateCmds(Brain);
+        Brain.nextRcvdLn();
+    }
+}
