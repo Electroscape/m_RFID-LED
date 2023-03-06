@@ -52,7 +52,7 @@ void setup() {
         // col 1 is the PWM index
         Brain.settings[i][1] = i;
         // col 2 is the amount of leds
-        Brain.settings[i][2] = 6;
+        Brain.settings[i][2] = 5;
     }
 
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
@@ -65,13 +65,13 @@ void setup() {
         LEDS.ledInit(Brain.settings); 
         Serial.println("Color Test");       
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
-        delay(2000);
+        delay(500);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
-        delay(2000);
+        delay(500);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
-        delay(2000);
+        delay(500);
         LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
-        delay(2000);
+        delay(1000);
         //Serial.println(F("Color Test finished"));        
     }
 #endif
