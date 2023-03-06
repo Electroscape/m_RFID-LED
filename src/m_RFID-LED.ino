@@ -18,9 +18,10 @@
 #include <stb_led.h>
 #include <stb_servo.h>
 
-// #define ledDisable 1
- #define rfidDisable 1
- #define relayDisable 1
+#define ledDisable 1
+#define rfidDisable 1
+#define relayDisable 1
+//#define ServoDisable 1
 
 
 STB_BRAIN Brain;
@@ -28,7 +29,10 @@ STB_BRAIN Brain;
 #ifndef ledDisable 
     STB_LED LEDS;
 #endif
-STB_SERVO Servos;
+
+#ifndef ServoDisable 
+    STB_SERVO Servos;
+#endif
 
 
 #ifndef rfidDisable
@@ -40,13 +44,24 @@ STB_SERVO Servos;
 #endif
 
 
+#ifndef ServoDisable 
+    void servoRecieve() {
+
+        while (Brain.STB_.rcvdPtr != NULL) {
+            Servos.evaluateCmds(Brain);
+            Brain.nextRcvdLn();
+        }
+    }
+#endif
+
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(0);
+    Brain.setSlaveAddr(1);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
 
+#ifndef ledDisable 
    // ledCount may aswell be one row 
     for (int i=0; i<ledCnt; i++) {
         // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
@@ -59,8 +74,9 @@ void setup() {
 
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
     Brain.settings[ledCnt][1] = NEO_GRB;
+#endif
 
-    Brain.flags = ledFlag + servoFlag;
+    Brain.flags = servoFlag;
 
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
@@ -88,14 +104,6 @@ void setup() {
     }
 #endif
     wdt_reset();
-  
-    /* Serial.println("Servo Strip3");
-    Servos.moveSingleServo(2,180);
-    delay(1000); 
-    Serial.println("Servo Strip3");
-    Servos.moveSingleServo(2,0);
-    delay(1000); */
-    //Brain.STB_.printSetupEnd();
 }
 
 void loop() {
@@ -116,11 +124,13 @@ void loop() {
     LEDS.LEDloop(Brain);      
 #endif
 
+#ifndef ServoDisable 
     if (Brain.flags & servoFlag && Brain.slaveRespond()) {
         Serial.println("slave got pushed");
         Serial.println(Brain.STB_.rcvdPtr);
-        servoReceive();
-    } 
+        servoRecieve();
+    }    
+#endif
 
     wdt_reset();
     
@@ -157,11 +167,3 @@ void ledReceive() {
     }
 }
 #endif
-
-void servoReceive() {
-
-    while (Brain.STB_.rcvdPtr != NULL) {
-        Servos.evaluateCmds(Brain);
-        Brain.nextRcvdLn();
-    }
-}
