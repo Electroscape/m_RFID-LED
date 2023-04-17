@@ -8,5 +8,7 @@ const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 #define RFID_DATABLOCK      1
 
-#define ledCnt 3
+#define ledRowCnt 1
+// per row
+#define ledCnt 1 
 

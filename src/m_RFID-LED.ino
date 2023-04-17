@@ -41,7 +41,7 @@ STB_BRAIN Brain;
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(1);
+    Brain.setSlaveAddr(2);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
@@ -54,20 +54,20 @@ void setup() {
     */
 
    // ledCount may aswell be one row 
-    for (int i=0; i<ledCnt; i++) {
+    for (int i=0; i<ledRowCnt; i++) {
         // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
         Brain.settings[i][0] = settingCmds::ledCount;
         // col 1 is the PWM index
         Brain.settings[i][1] = i;
         // col 2 is the amount of leds
-        Brain.settings[i][2] = 1;
+        Brain.settings[i][2] = ledCnt;
     }
 
-    Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
-    Brain.settings[ledCnt][1] = NEO_RGB;
-    Brain.settings[ledCnt][2] = NEO_RGB;
-    Brain.settings[ledCnt][3] = NEO_RGB;
-    Brain.settings[ledCnt][4] = NEO_RGB;
+    Brain.settings[ledRowCnt][0] = settingCmds::ledClrOrder;
+    Brain.settings[ledRowCnt][1] = NEO_RGB;
+    Brain.settings[ledRowCnt][2] = NEO_RGB;
+    Brain.settings[ledRowCnt][3] = NEO_RGB;
+    Brain.settings[ledRowCnt][4] = NEO_RGB;
 
     Brain.flags = ledFlag;
 
