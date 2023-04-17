@@ -8,14 +8,7 @@ const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 #define RFID_DATABLOCK      1
 
-// --- LED settings --- 
+#define ledRowCnt 1
+// per row
+#define ledCnt 1 
 
-/*
-got moved into the library
-
-#define STRIPE_CNT             1
-
-// 140cm of 60 leds/m = 84 Leds to be safe bump it to 100
-int ledCnts[STRIPE_CNT] = {100};
-int ledPins[STRIPE_CNT] = {RFID_1_LED_PIN};
-*/

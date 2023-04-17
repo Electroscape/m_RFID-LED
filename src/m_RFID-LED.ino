@@ -19,8 +19,9 @@
 #include <stb_led.h>
 
 // #define ledDisable 1
-// #define rfidDisable 1
+#define rfidDisable 1
 // #define relayDisable 1
+
 
 STB_BRAIN Brain;
 
@@ -40,7 +41,7 @@ STB_BRAIN Brain;
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(1);
+    Brain.setSlaveAddr(2);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
@@ -52,20 +53,25 @@ void setup() {
     Brain.receiveSettings();
     */
 
-    /*
-    // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
-    Brain.settings[0][0] = settingCmds::ledCount;
-    // col 1 is the PWM index
-    Brain.settings[0][1] = 0;
-    // col 2 is the amount of leds
-    Brain.settings[0][2] = 4;
-    */
+   // ledCount may aswell be one row 
+    for (int i=0; i<ledRowCnt; i++) {
+        // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
+        Brain.settings[i][0] = settingCmds::ledCount;
+        // col 1 is the PWM index
+        Brain.settings[i][1] = i;
+        // col 2 is the amount of leds
+        Brain.settings[i][2] = ledCnt;
+    }
 
-    // Brain.flags[rfidFlag] = 1;
-    // Brain.flags = ledFlag;
+    Brain.settings[ledRowCnt][0] = settingCmds::ledClrOrder;
+    Brain.settings[ledRowCnt][1] = NEO_RGB;
+    Brain.settings[ledRowCnt][2] = NEO_RGB;
+    Brain.settings[ledRowCnt][3] = NEO_RGB;
+    Brain.settings[ledRowCnt][4] = NEO_RGB;
 
+    Brain.flags = ledFlag;
 
-    Brain.receiveSetup();
+    // Brain.receiveSetup();
 
 
 
@@ -79,7 +85,16 @@ void setup() {
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
         LEDS.ledInit(Brain.settings);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(75, 0, 0));
+        
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
+
+        
     }
 #endif
 
@@ -88,22 +103,23 @@ void setup() {
     Brain.STB_.printSetupEnd();
 }
 
-
 void loop() {
-
+    //Serial.println(millis());
     #ifndef rfidDisable
     if (Brain.flags & rfidFlag) {
         rfidRead();
     }
     #endif
-
+    
     if (Brain.flags & ledFlag && Brain.slaveRespond()) {
         Serial.println("slave got pushed");
         Serial.println(Brain.STB_.rcvdPtr);
         ledReceive();
     }
-    
+  
+    LEDS.LEDloop(Brain);
     wdt_reset();
+    
 }
 
 
