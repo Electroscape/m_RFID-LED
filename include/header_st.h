@@ -10,5 +10,5 @@ const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 #define ledRowCnt 1
 // per row
-#define ledCnt 1 
+#define ledCnt 7 
 
