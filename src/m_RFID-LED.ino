@@ -18,10 +18,6 @@
 #include <stb_brain.h>
 #include <stb_led.h>
 
-// #define ledDisable 1
-#define rfidDisable 1
-// #define relayDisable 1
-
 
 STB_BRAIN Brain;
 
@@ -41,7 +37,7 @@ STB_BRAIN Brain;
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(2);
+    Brain.setSlaveAddr(slaveIndex);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
