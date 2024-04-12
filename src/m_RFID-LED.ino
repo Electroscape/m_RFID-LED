@@ -67,9 +67,13 @@ void setup() {
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
         LEDS.ledInit(Brain.settings);        
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
+        delay(1000);
+        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
+        delay(1000);
         wdt_disable();
-        while (true) {}
         //Serial.println(F("Color Test finished"));        
     }
 #endif
