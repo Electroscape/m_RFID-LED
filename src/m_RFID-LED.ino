@@ -62,7 +62,7 @@ void setup() {
     Brain.settings[ledCnt][3] = NEO_BRG;
     Brain.settings[ledCnt][4] = NEO_BRG;
 
-    Brain.flags = ledFlag;
+    Brain.flags = ledFlag + rfidFlag;
 
 #ifndef ledDisable
     if (Brain.flags & ledFlag) {
