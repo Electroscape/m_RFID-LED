@@ -41,7 +41,7 @@ STB_BRAIN Brain;
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(5);
+    Brain.setSlaveAddr(0);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
@@ -57,10 +57,10 @@ void setup() {
     }
 
     Brain.settings[ledCnt][0] = settingCmds::ledClrOrder;
-    Brain.settings[ledCnt][1] = NEO_BRG;
-    Brain.settings[ledCnt][2] = NEO_BRG;
-    Brain.settings[ledCnt][3] = NEO_BRG;
-    Brain.settings[ledCnt][4] = NEO_BRG;
+    Brain.settings[ledCnt][1] = NEO_GRB;
+    Brain.settings[ledCnt][2] = NEO_GRB;
+    Brain.settings[ledCnt][3] = NEO_GRB;
+    Brain.settings[ledCnt][4] = NEO_GRB;
 
     Brain.flags = ledFlag + rfidFlag;
 
