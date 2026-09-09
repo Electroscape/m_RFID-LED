@@ -21,82 +21,117 @@
 
 STB_BRAIN Brain;
 
-#ifndef ledDisable 
+#ifdef LED_ENABLE
     STB_LED LEDS;
 #endif
 
 
-// for software SPI use (PN532_SCK, PN532_MISO, PN532_MOSI, RFID_SSPins[0])
-#ifndef rfidDisable
-    Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
-    Adafruit_PN532 RFID_READERS[1] = {RFID_0};
+#ifdef RFID_ENABLE
+
     uint8_t data[16];
+    Adafruit_PN532 RFID_0(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_1_SS_PIN);
+
+    #if RFID_AMOUNT > 1
+        Adafruit_PN532 RFID_1(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_2_SS_PIN);
+    #endif
+
+    #if RFID_AMOUNT > 2
+        Adafruit_PN532 RFID_2(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_3_SS_PIN);
+    #endif
+
+    #if RFID_AMOUNT > 3
+        Adafruit_PN532 RFID_3(PN532_SCK, PN532_MISO, PN532_MOSI, RFID_4_SS_PIN);
+    #endif
+
+    // hardcoded to 4 as the maximum of the hardware capability
+    #if RFID_AMOUNT == 1
+
+        Adafruit_PN532 RFID_READERS[1] = {
+            RFID_0
+        };
+
+    #elif RFID_AMOUNT == 2
+
+        Adafruit_PN532 RFID_READERS[2] = {
+            RFID_0,
+            RFID_1
+        };
+
+    #elif RFID_AMOUNT == 3
+
+        Adafruit_PN532 RFID_READERS[3] = {
+            RFID_0,
+            RFID_1,
+            RFID_2
+        };
+
+    #elif RFID_AMOUNT == 4
+
+        Adafruit_PN532 RFID_READERS[4] = {
+            RFID_0,
+            RFID_1,
+            RFID_2,
+            RFID_3
+        };
+
+    #else
+        #error "RFID_AMOUNT must be between 1 and 4"
+    #endif
+
+    STB_RFID RFIDS;
     unsigned long lastRfidCheck = millis();
 #endif
 
 
 void setup() {
     Brain.begin();
-    Brain.setSlaveAddr(slaveIndex);
+    Brain.setSlaveAddr(BRAIN_SLAVE_ADDR);
     Brain.dbgln(F("WDT endabled"));
     wdt_enable(WDTO_8S);
     wdt_reset();
+    Brain.flags = BRAIN_FLAGS;
 
-    /*
-    Serial.println(F("ReceiveFlags")); Serial.flush();
-    Brain.receiveFlags();
-    Serial.println(F("ReceiveSettings")); Serial.flush();
-    Brain.receiveSettings();
-    */
+    #ifdef LED_ENABLE
 
-   // ledCount may aswell be one row 
-    for (int i=0; i<ledRowCnt; i++) {
-        // col 0 is the cmd type 0 is for setLedamount aka settingCmds::ledCount;
-        Brain.settings[i][0] = settingCmds::ledCount;
-        // col 1 is the PWM index
-        Brain.settings[i][1] = i;
-        // col 2 is the amount of leds
-        Brain.settings[i][2] = ledCnt;
-    }
+        for (int i = 0; i < LED_STRIP_COUNT; i++) {
+            Brain.settings[i][0] = settingCmds::ledCount;
+            Brain.settings[i][1] = i;
+            Brain.settings[i][2] = LEDS_PER_STRIP;
+        }
 
-    Brain.settings[ledRowCnt][0] = settingCmds::ledClrOrder;
-    Brain.settings[ledRowCnt][1] = NEO_RGB;
-    Brain.settings[ledRowCnt][2] = NEO_RGB;
-    Brain.settings[ledRowCnt][3] = NEO_RGB;
-    Brain.settings[ledRowCnt][4] = NEO_RGB;
-
-    Brain.flags = ledFlag;
-
-    // Brain.receiveSetup();
-
-
-
-#ifndef rfidDisable
-    if (Brain.flags & rfidFlag) {
-        STB_RFID::RFIDInit(RFID_0);
-        wdt_reset();
-    }
-#endif
-
-#ifndef ledDisable
-    if (Brain.flags & ledFlag) {
-        LEDS.ledInit(Brain.settings);
+        Brain.settings[LED_STRIP_COUNT][0] = settingCmds::ledClrOrder;
+        for (int i = 1; i <= LED_STRIP_COUNT; i++) {
+            // i think ledStripcount is used because the prior slots are used up by teh led config, this is a row of all the clr orders ... technically not yet individually configurable as of yet
+            Brain.settings[LED_STRIP_COUNT][i] = LED_COLOR_ORDER;
+        }
         
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
-        delay(1000);
-        LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 255, 255));
 
-        
-    }
-#endif
+        if (Brain.flags & ledFlag) {
+            LEDS.ledInit(Brain.settings);        
+            LEDS.setAllStripsToClr(LEDS.Strips[0].Color(255, 0, 0));
+            delay(1000);
+            LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 255, 0));
+            delay(1000);
+            LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 255));
+            delay(1000);
+            LEDS.setAllStripsToClr(LEDS.Strips[0].Color(0, 0, 0));
+            wdt_disable();
+        //Serial.println(F("Color Test finished"));        
+        }
+
+    #endif
+
+
+    #ifndef rfidDisable
+        if (Brain.flags & rfidFlag) {
+            for (int i = 0; i < RFID_AMOUNT; i++) {
+                STB_RFID::RFIDInit(RFID_READERS[i]);
+            }
+            wdt_reset();
+        }
+    #endif
 
     wdt_reset();
-
-    Brain.STB_.printSetupEnd();
 }
 
 void loop() {

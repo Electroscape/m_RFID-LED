@@ -1,20 +1,26 @@
 #pragma once
 
+// -------------------- RFID --------------------
+
+#define RFID_ENABLE
+
+#define RFID_AMOUNT        3
+#define RFID_DATABLOCK     1
+
 const unsigned long rfidCheckInterval = 250;
 
-#define RFID_AMOUNT         1
 
-// if you change one of these do also set the brainflags accordingly
-// #define ledDisable 1
-#define rfidDisable 1
-// #define relayDisable 1
+// -------------------- LEDs --------------------
 
-const uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+#define LED_ENABLE
 
-#define RFID_DATABLOCK      1
+#define LED_STRIP_COUNT          3
+#define LEDS_PER_STRIP     3
 
-#define ledRowCnt 1
-// per row
-#define ledCnt 1 
-#define slaveIndex 2
+#define LED_COLOR_ORDER    NEO_RGB
 
+
+// -------------------- Brain --------------------
+
+#define BRAIN_SLAVE_ADDR   0
+#define BRAIN_FLAGS        (cmdFlags::ledFlag | cmdFlags::rfidFlag)
