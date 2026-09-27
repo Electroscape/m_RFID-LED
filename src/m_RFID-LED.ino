@@ -122,7 +122,7 @@ void setup() {
     #endif
 
 
-    #ifndef rfidDisable
+    #ifdef RFID_ENABLE
         if (Brain.flags & rfidFlag) {
             for (int i = 0; i < RFID_AMOUNT; i++) {
                 STB_RFID::RFIDInit(RFID_READERS[i]);
@@ -136,19 +136,26 @@ void setup() {
 
 void loop() {
     //Serial.println(millis());
-    #ifndef rfidDisable
+    #ifdef RFID_ENABLE
+    // Brain.flags & rfidFlag &&
     if (Brain.flags & rfidFlag) {
         rfidRead();
     }
+    if ( Brain.slaveRespond()) {
+        Serial.println("slave got pushed");
+        
+    }
     #endif
     
+    #ifdef LED_ENABLE
+    //slaverespond still needs to get called for RFID, so not leaving this conditional on led enable
     if (Brain.flags & ledFlag && Brain.slaveRespond()) {
         Serial.println("slave got pushed");
         Serial.println(Brain.STB_.rcvdPtr);
         ledReceive();
     }
-  
     LEDS.LEDloop(Brain);
+    #endif
     wdt_reset();
     
 }
@@ -185,12 +192,12 @@ void rfidRead() {
 #endif
 
 
-#ifndef ledDisable
-void ledReceive() {
 
+void ledReceive() {
+    #ifdef LED_ENABLE
     while (Brain.STB_.rcvdPtr != NULL) {
         LEDS.evaluateCmds(Brain);
         Brain.nextRcvdLn();
     }
+    #endif
 }
-#endif
